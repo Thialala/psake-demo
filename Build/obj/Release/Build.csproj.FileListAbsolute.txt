@@ -1,0 +1,10 @@
+C:\dev\source_code\PluralSight\psake\.build\temp\Build.dll
+C:\dev\source_code\PluralSight\psake\.build\temp\Build.pdb
+C:\dev\source_code\PluralSight\psake\Build\obj\Release\Build.csprojResolveAssemblyReference.cache
+C:\dev\source_code\PluralSight\psake\Build\obj\Release\Build.dll
+C:\dev\source_code\PluralSight\psake\Build\obj\Release\Build.pdb
+C:\Users\Ousmane Barry\Desktop\Github\psake-demo\.build\temp\Build.dll
+C:\Users\Ousmane Barry\Desktop\Github\psake-demo\.build\temp\Build.pdb
+C:\Users\Ousmane Barry\Desktop\Github\psake-demo\Build\obj\Release\Build.csprojResolveAssemblyReference.cache
+C:\Users\Ousmane Barry\Desktop\Github\psake-demo\Build\obj\Release\Build.dll
+C:\Users\Ousmane Barry\Desktop\Github\psake-demo\Build\obj\Release\Build.pdb
