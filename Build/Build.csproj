@@ -48,6 +48,9 @@
       <Link>build.ps1</Link>
     </None>
     <None Include="default.ps1" />
+    <None Include="MSBuild\NUnitBuild.targets">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
