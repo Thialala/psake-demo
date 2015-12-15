@@ -4,3 +4,15 @@
 
 /.build
 /packages
+/Build/bin
+/Build/obj/Debug
+/WebApplication.Tests/obj
+/WebApplication.Tests/bin/Debug
+*.suo
+/WebApplication/bin
+/WebApplication/obj
+/ClassLibrary/bin/Debug
+/ClassLibrary/obj
+/ConsoleApplication/bin/Debug
+/ConsoleApplication/obj/Debug
+/ConsoleApplication/obj/Release
