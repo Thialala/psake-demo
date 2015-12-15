@@ -3,7 +3,6 @@
 ################################################################################
 
 /.build
-/packages
 /Build/bin
 /Build/obj/Debug
 /WebApplication.Tests/obj
