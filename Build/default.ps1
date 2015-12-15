@@ -131,6 +131,33 @@ task Test -depends Compile, TestNUnit -description "Run the tests" {
 		# Generate HTML test coverage report
 		Write-Host "`r`n Generating HTML test coverage report"
 		Exec { &$reportGeneratorExe $testCoverageReportPath $testCoverageDirectory }
+
+		Write-Host "Parsing OpenCover results"
+
+		# Load the coverage report as XML
+		$coverage = [xml](Get-Content -Path $testCoverageReportPath)
+		$coverageSummary = $coverage.CoverageSession.Summary
+
+		# Write class coverage
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageAbsCCovered' value='$($coverageSummary.visitedClasses)']"
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageAbsCTotal' value='$($coverageSummary.numClasses)']"
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageC' value='{0:N2}']" -f (($coverageSummary.visitedClasses/$coverageSummary.numClasses)*100)
+
+		# Report method coverage
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageAbsMCovered' value='$($coverageSummary.visitedMethods)']"
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageAbsMTotal' value='$($coverageSummary.numMethods)']"
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageM' value='{0:N2}']" -f (($coverageSummary.visitedMethods/$coverageSummary.numMethods)*100)
+
+		# Report branch coverage
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageAbsBCovered' value='$($coverageSummary.visitedBranchPoints)']"
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageAbsBTotal' value='$($coverageSummary.numBranchPoints)']"
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageB' value='{0:N2}']" -f (($coverageSummary.visitedBranchPoints/$coverageSummary.numBranchPoints)*100)
+
+		# Report statement point coverage
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageAbsSCovered' value='$($coverageSummary.visitedSequencePoints)']"
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageAbsSTotal' value='$($coverageSummary.numSequencePoints)']"
+		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageS' value='$($coverageSummary.sequenceCoverage)']"
+
 	}
 	else
 	{
