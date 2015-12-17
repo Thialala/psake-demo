@@ -220,15 +220,15 @@ task Package `
 				Exec {&$nugetExe pack $nuspecPath -OutputDirectory $applicationsOutputDirectory}
 			}
 
-			else
-			{
-				Write-Host "Packaging $($application.Name) as zip file"
+			#else
+			#{
+			#	Write-Host "Packaging $($application.Name) as zip file"
 
-				$archivePath = "$($applicationsOutputDirectory)\$($application.Name).zip"
-				$inputDirectory = "$($application.FullName)\*"
+			#	$archivePath = "$($applicationsOutputDirectory)\$($application.Name).zip"
+			#	$inputDirectory = "$($application.FullName)\*"
 
-				Exec { &$7zipExe a -r -mx3 $archivePath $inputDirectory}
-			}
+			#	Exec { &$7zipExe a -r -mx3 $archivePath $inputDirectory}
+			#}
 		}
 }
 
