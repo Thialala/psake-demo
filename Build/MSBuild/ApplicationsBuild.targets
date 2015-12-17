@@ -1,6 +1,6 @@
 ﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<NunitProjectOutputDirectory>$(OutDir)_PublishedNUnitTests\$(MSBuildProjectName)</NunitProjectOutputDirectory>
+		<NunitProjectOutputDirectory>$(OutDir)_PublishedApplications\$(MSBuildProjectName)</NunitProjectOutputDirectory>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -10,11 +10,11 @@
 
 	<PropertyGroup>
 		<PrepareForRunDependsOn>
-			$(PrepareForRunDependsOn);_CopyNUnitTests
+			$(PrepareForRunDependsOn);_CopyApplications
 		</PrepareForRunDependsOn>
 	</PropertyGroup>
 
-	<Target Name="_CopyNUnitTests" Condition="!$(Disable_CopyWebApplication) And '$(OutDir)' != '$(OutputPath)'">
+	<Target Name="_CopyApplications" Condition="!$(Disable_CopyWebApplication) And '$(OutDir)' != '$(OutputPath)'">
     <!-- Log tasks -->
     <Message Text="Copying Web Application Project Files for $(MSBuildProjectName)" />
 

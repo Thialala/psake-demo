@@ -12,7 +12,7 @@ $psakeModule = (Get-ChildItem(".\packages\psake*\tools\psake.ps1")) |
 Import-Module $psakeModule
 
 Invoke-psake -buildFile .\Build\default.ps1 `
-			 -taskList Test `
+			 -taskList Package `
 			 -framework 4.5.2 `
 			 -properties @{
 							"buildConfiguration"="Release"

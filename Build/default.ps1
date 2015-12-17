@@ -5,11 +5,13 @@
 	$testMessage = 'Execute Test!'
 	$compileMessage = 'Executed Compile!'
 	$cleanMessage = 'Executed Clean!'
+
 	$solutionDirectory = (Get-Item $solutionFile).DirectoryName
 	$outputDirectory = "$solutionDirectory\.build"
 	$tempDirectory = "$outputDirectory\temp"
 
-	$publishedNUnitTestsDirectory = "$tempDirectory\_PublisherNUnitTests"
+	
+	$publishedNUnitTestsDirectory = "$tempDirectory\_PublishedNUnitTests"
 	$testResultsDirectory = "$outputDirectory\TestResults"
 	$NUnitTestResultsDirectory = "$testResultsDirectory\NUnit"
 	$NUnitExe = ((Get-ChildItem("..\packages\NUnit.Runners*")) | Select-Object $_.FullName | Sort-Object $_ | 
@@ -18,12 +20,19 @@
 			Select -Last 1).FullName + "\tools\OpenCover.Console.exe"
 	$reportGeneratorExe = ((Get-ChildItem("..\packages\ReportGenerator*")) | Select-Object $_.FullName | Sort-Object $_ |
 			Select -Last 1).FullName + "\tools\ReportGenerator.exe"
+	$7ZipExe = ((Get-ChildItem("..\packages\7-Zip.CommandLine*")) | Select-Object $_.FullName | Sort-Object $_ |
+			Select -Last 1).FullName + "\tools\7za.exe"
 
 	$testCoverageDirectory = "$outputDirectory\TestCoverage"
 	$testCoverageReportPath = "$testCoverageDirectory\OpenCover.xml"
 	$testCoverageFilter = "+[*]* -[*.Tests]*"  #+/-[MyAssembly]MyNamespace
 	$testCoverageExcludeByAttribute = "System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage"
 	$testCoverageExcludeByFile = "*\*Designer.cs;*\*.g.cs;*\*.g.i.cs"
+
+	$publishedWebsitesDirectory = "$tempDirectory\_PublishedWebsites"
+	$publishedApplicationsDirectory = "$tempDirectory\_PublishedApplications"
+	$packagesOutputDirectory = "$outputDirectory\Packages"
+	$applicationsOutputDirectory = "$packagesOutputDirectory\Applications"
 }
 
 FormatTaskName "`r`n`r`n---------- Executing {0} Task --------"
@@ -52,6 +61,7 @@ task Init -description "Initialises the build by removing previous artifacts and
 	Assert (Test-Path $NUnitExe) "NUnit Console could not be found"
 	Assert (Test-Path $openCoverExe) "OpenCover Console could not be found"
 	Assert (Test-Path $reportGeneratorExe) "ReportGenerator could not be found"
+	Assert (Test-Path $7zipExe) "7zip Exe could not be found"
 
 	Write-Host "Creating output directory located at ..\.build"
 	New-Item $outputDirectory -ItemType Directory | Out-Null
@@ -157,10 +167,35 @@ task Test -depends Compile, TestNUnit -description "Run the tests" {
 		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageAbsSCovered' value='$($coverageSummary.visitedSequencePoints)']"
 		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageAbsSTotal' value='$($coverageSummary.numSequencePoints)']"
 		Write-Host "##teamcity[buildStatisticValue key='CodeCoverageS' value='$($coverageSummary.sequenceCoverage)']"
-
 	}
 	else
 	{
 		Write-Host "No coverage file found at: $testCoveragePath"
 	}
 }
+
+task Package `
+	-depends Compile, Test `
+	-description "Packaging the application" `
+	-requiredVariables publishedWebsitesDirectory, publishedApplicationsDirectory, applicationsOutputDirectory {
+
+		# Merge published websites and published applications path
+		$applications = @(Get-ChildItem $publishedWebsitesDirectory) + @(Get-ChildItem $publishedApplicationsDirectory)
+
+		if($applications.Count -gt 0 -and !(Test-Path $applicationsOutputDirectory))
+		{
+			Write-Host "Creating applications package directory at: $applicationsOutputDirectory"
+			mkdir $applicationsOutputDirectory | Out-Null
+		}
+
+		foreach($application in $applications)
+		{
+			Write-Host "Packaging $($application.Name) as zip file"
+
+			$archivePath = "$($applicationsOutputDirectory)\$($application.Name).zip"
+			$inputDirectory = "$($application.FullName)\*"
+
+			Exec { &$7zipExe a -r -mx3 $archivePath $inputDirectory}
+		}
+}
+
