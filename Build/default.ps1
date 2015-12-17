@@ -22,6 +22,7 @@
 			Select -Last 1).FullName + "\tools\ReportGenerator.exe"
 	$7ZipExe = ((Get-ChildItem("..\packages\7-Zip.CommandLine*")) | Select-Object $_.FullName | Sort-Object $_ |
 			Select -Last 1).FullName + "\tools\7za.exe"
+	$nugetExe = "$solutionDirectory\.nuget\NuGet.exe"
 
 	$testCoverageDirectory = "$outputDirectory\TestCoverage"
 	$testCoverageReportPath = "$testCoverageDirectory\OpenCover.xml"
@@ -62,6 +63,7 @@ task Init -description "Initialises the build by removing previous artifacts and
 	Assert (Test-Path $openCoverExe) "OpenCover Console could not be found"
 	Assert (Test-Path $reportGeneratorExe) "ReportGenerator could not be found"
 	Assert (Test-Path $7zipExe) "7zip Exe could not be found"
+	Assert (Test-Path $nugetExe) "NuGet Exe could not be found"
 
 	Write-Host "Creating output directory located at ..\.build"
 	New-Item $outputDirectory -ItemType Directory | Out-Null
@@ -190,12 +192,43 @@ task Package `
 
 		foreach($application in $applications)
 		{
-			Write-Host "Packaging $($application.Name) as zip file"
+			$nuspecPath = $application.FullName + "\" + $application.Name + ".nuspec"
 
-			$archivePath = "$($applicationsOutputDirectory)\$($application.Name).zip"
-			$inputDirectory = "$($application.FullName)\*"
+			if (Test-Path $nuspecPath)
+			{
+				Write-Host "Packaging $($application.Name) as Nuget package"
 
-			Exec { &$7zipExe a -r -mx3 $archivePath $inputDirectory}
+				# Load the nuspec file as xml
+				$nuspec = [xml](Get-Content -Path $nuspecPath)
+				$metadata = $nuspec.package.metadata
+
+				# Edit the metadata
+				$metadata.version = $metadata.version.Replace("[buildNumber]", $buildNumber)
+
+				if(! $isMainBranch)
+				{
+					$metadata.version = $metadata.version + "-$branchName"
+				}
+
+				$metadata.releaseNotes = "Build Number: $buildNumber`r`nBranch Name:
+				$branchName`r`nCommit Hash: $gitCommitHash"
+
+				# Save the nupec file
+				$nuspec.Save((Get-Item $nuspecPath))
+
+				# package as Nuget package
+				Exec {&$nugetExe pack $nuspecPath -OutputDirectory $applicationsOutputDirectory}
+			}
+
+			else
+			{
+				Write-Host "Packaging $($application.Name) as zip file"
+
+				$archivePath = "$($applicationsOutputDirectory)\$($application.Name).zip"
+				$inputDirectory = "$($application.FullName)\*"
+
+				Exec { &$7zipExe a -r -mx3 $archivePath $inputDirectory}
+			}
 		}
 }
 
